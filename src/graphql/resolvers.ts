@@ -17,7 +17,8 @@ export const resolvers = {
             include: {
               author: true,
               likes: { include: { user: true } },
-              comments: { include: { author: true } }
+              comments: { include: { author: true } },
+              savedBy: { include: { user: true } }
             },
             orderBy: { createdAt: 'desc' }
           },
@@ -27,7 +28,6 @@ export const resolvers = {
       });
     },
     feed: async () => {
-      // For MVP, just return all posts ordered by newest
       return prisma.post.findMany({
         orderBy: { createdAt: "desc" },
         include: {
@@ -37,6 +37,9 @@ export const resolvers = {
           },
           comments: {
             include: { author: true }
+          },
+          savedBy: {
+            include: { user: true }
           }
         },
       });
@@ -65,7 +68,8 @@ export const resolvers = {
         include: {
           author: true,
           likes: { include: { user: true } },
-          comments: { include: { author: true } }
+          comments: { include: { author: true } },
+          savedBy: { include: { user: true } }
         }
       });
     },
@@ -77,7 +81,8 @@ export const resolvers = {
             include: {
               author: true,
               likes: { include: { user: true } },
-              comments: { include: { author: true } }
+              comments: { include: { author: true } },
+              savedBy: { include: { user: true } }
             },
             orderBy: { createdAt: 'desc' }
           },
@@ -94,7 +99,8 @@ export const resolvers = {
           likes: {
             include: { user: true }
           },
-          comments: { include: { author: true } }
+          comments: { include: { author: true } },
+          savedBy: { include: { user: true } }
         }
       });
     },
@@ -138,7 +144,8 @@ export const resolvers = {
         include: {
           author: true,
           likes: { include: { user: true } },
-          comments: { include: { author: true } }
+          comments: { include: { author: true } },
+          savedBy: { include: { user: true } }
         },
         orderBy: { createdAt: 'desc' },
         take: 10
@@ -157,7 +164,11 @@ export const resolvers = {
       return prisma.story.findMany({
         where: { expiresAt: { gt: now } },
         orderBy: { createdAt: 'desc' },
-        include: { author: true }
+        include: {
+          author: true,
+          sharedPost: { include: { author: true } },
+          views: { include: { user: true } }
+        }
       });
     }
   },
@@ -444,7 +455,8 @@ export const resolvers = {
       if (parent.sharedPost) return parent.sharedPost;
       return prisma.post.findUnique({ where: { id: parent.sharedPostId }, include: { author: true } });
     },
-    viewers: async (parent: Story) => {
+    viewers: async (parent: Story & { views?: { user: User }[] }) => {
+      if (parent.views) return parent.views.map((v) => v.user);
       const views = await prisma.storyView.findMany({
         where: { storyId: parent.id },
         include: { user: true },

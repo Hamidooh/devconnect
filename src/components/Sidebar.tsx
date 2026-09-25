@@ -44,8 +44,9 @@ export default function Sidebar() {
 
   const { data: notifData } = useQuery<{ getNotifications: { read: boolean }[] }>(GET_UNREAD_NOTIFICATIONS, {
     skip: !session,
-    fetchPolicy: "cache-and-network",
-    pollInterval: 30000 // Poll every 30s to keep it updated
+    fetchPolicy: "cache-first",
+    nextFetchPolicy: "cache-first",
+    pollInterval: 60000 // Poll every 60s
   });
 
   const unreadCount = notifData?.getNotifications?.filter((n: { read: boolean }) => !n.read).length || 0;

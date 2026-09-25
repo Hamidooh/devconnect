@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![GraphQL](https://img.shields.io/badge/GraphQL-Apollo-E10098?style=for-the-badge&logo=graphql)](https://graphql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](#-license)
 
 ---
 
@@ -153,22 +153,6 @@ The app exposes a unified GraphQL endpoint at `/api/graphql`. Key operations inc
 
 ---
 
-## 🌐 Deployment
-
-### Option A: Railway / Render (Recommended for SQLite & Local Uploads)
-1. Fork or push this repository to GitHub.
-2. Link your repository in [Railway](https://railway.app) or [Render](https://render.com).
-3. Set environment variables: `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `NODE_ENV=production`.
-4. Attach a persistent volume to persist SQLite (`dev.db`) and uploaded media (`/public/uploads`).
-
-### Option B: Vercel + Turso (Serverless)
-1. Connect a free cloud database on [Turso](https://turso.tech) and set `DATABASE_URL="libsql://your-db.turso.io"`.
-2. Connect your repository on [Vercel](https://vercel.com).
-3. Add `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and `DATABASE_URL` in the Vercel dashboard.
-4. Deploy!
-
----
-
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+Copyright © 2026. All rights reserved. Unauthorized copying, distribution, or hosting of this project is strictly prohibited.

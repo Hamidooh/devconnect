@@ -77,57 +77,6 @@
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (version 18.17.0 or higher recommended)
-- `npm`, `yarn`, or `pnpm`
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Hamidooh/devconnect.git
-cd devconnect
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-# NextAuth Configuration
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-super-secret-random-key"
-
-# Database Configuration (defaults to local SQLite)
-DATABASE_URL="file:./dev.db"
-```
-
-### 4. Initialize Database
-
-Push the schema migrations to your local SQLite database:
-
-```bash
-npx prisma db push
-npx prisma generate
-```
-
-### 5. Run the development server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser to start using DevConnect!
-
----
 
 ## 📡 GraphQL API Reference
 

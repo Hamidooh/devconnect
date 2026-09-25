@@ -57,3 +57,6 @@ CLAUDE.md
 AGENTS.md
 .agents
 
+# local infrastructure
+docker-compose*.yml
+

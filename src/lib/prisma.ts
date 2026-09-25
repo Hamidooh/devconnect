@@ -4,7 +4,8 @@ import { PrismaLibSql } from '@prisma/adapter-libsql'
 const urlToUse = process.env.DATABASE_URL && process.env.DATABASE_URL !== 'undefined' ? process.env.DATABASE_URL : 'file:./dev.db';
 
 const adapter = new PrismaLibSql({
-  url: urlToUse
+  url: urlToUse,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 })
 
 const globalForPrisma = globalThis as unknown as { prisma_story?: PrismaClient }

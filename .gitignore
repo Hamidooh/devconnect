@@ -48,3 +48,12 @@ yarn-error.log*
 /public/uploads/*
 !/public/uploads/.gitkeep
 /scratch/
+check.js
+fix_anys_script.js
+rewrite_resolvers.js
+
+# agent & AI configs
+CLAUDE.md
+AGENTS.md
+.agents
+

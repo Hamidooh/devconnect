@@ -44,10 +44,12 @@ const GET_USER = gql`
       posts {
         id
         content
+        mediaUrl
         createdAt
         author {
           id
           name
+          username
           image
         }
         likes {
@@ -62,6 +64,11 @@ const GET_USER = gql`
         comments {
           id
         }
+        savedBy {
+          user {
+            id
+          }
+        }
       }
       comments {
         id
@@ -70,6 +77,7 @@ const GET_USER = gql`
         post {
           id
           content
+          mediaUrl
           createdAt
           author {
             id
@@ -92,6 +100,7 @@ const GET_USER = gql`
         post {
           id
           content
+          mediaUrl
           createdAt
           author {
             id
@@ -145,7 +154,8 @@ export default function UserProfilePage() {
   const { data: session } = useSession();
   const { data, loading, error } = useQuery<any>(GET_USER, {
     variables: { id: id || "" },
-    skip: !id
+    skip: !id,
+    fetchPolicy: "cache-and-network"
   });
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'profile' | 'followers' | 'following'>('profile');
@@ -164,7 +174,41 @@ export default function UserProfilePage() {
   const isOwnProfile = session?.user?.id === id;
   const isFollowing = data?.user?.followers?.some((f: { id: string }) => f.id === session?.user?.id);
 
-  if (loading) return <div className="container" style={{paddingTop: '100px'}}>Loading profile...</div>;
+  if (loading && !data?.user) {
+    return (
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content" style={{ padding: 0 }}>
+          <div className="connect-header" style={{ borderBottom: '1px solid hsl(var(--border-subtle))', position: 'sticky', top: 0, zIndex: 10, background: 'hsl(var(--bg-primary))', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div>
+              <div className="skeleton" style={{ width: '140px', height: '22px', borderRadius: '4px', marginBottom: '6px' }}></div>
+              <div className="skeleton" style={{ width: '60px', height: '14px', borderRadius: '4px' }}></div>
+            </div>
+          </div>
+          <div className="profile-cover skeleton" style={{ width: '100%', height: '200px', borderRadius: 0 }}></div>
+          <div className="profile-header" style={{ padding: '0 20px', position: 'relative' }}>
+            <div className="profile-avatar-container" style={{ marginTop: '-60px', marginBottom: '16px' }}>
+              <div className="skeleton" style={{ width: '120px', height: '120px', borderRadius: '50%', border: '4px solid hsl(var(--bg-primary))' }}></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              <div className="skeleton" style={{ width: '180px', height: '24px', borderRadius: '6px' }}></div>
+              <div className="skeleton" style={{ width: '100px', height: '16px', borderRadius: '4px' }}></div>
+              <div className="skeleton" style={{ width: '280px', height: '16px', borderRadius: '4px', marginTop: '6px' }}></div>
+            </div>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+              <div className="skeleton" style={{ width: '80px', height: '18px', borderRadius: '4px' }}></div>
+              <div className="skeleton" style={{ width: '80px', height: '18px', borderRadius: '4px' }}></div>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid hsl(var(--border-subtle))', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="skeleton" style={{ width: '100%', height: '140px', borderRadius: '16px' }}></div>
+            <div className="skeleton" style={{ width: '100%', height: '140px', borderRadius: '16px' }}></div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (error) return <div className="container">Error loading profile: {error.message}</div>;
 
   const user = data?.user as ProfileUserType | undefined;

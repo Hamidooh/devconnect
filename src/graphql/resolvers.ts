@@ -9,9 +9,12 @@ interface GraphQLContext {
 export const resolvers = {
   Query: {
     me: async (_: unknown, __: unknown, context: GraphQLContext) => {
-      if (!context.session?.user?.email) return null;
+      if (!context.session?.user?.id && !context.session?.user?.email) return null;
+      const where = context.session.user.id
+        ? { id: context.session.user.id }
+        : { email: context.session.user.email! };
       return prisma.user.findUnique({
-        where: { email: context.session.user.email },
+        where,
         include: {
           posts: {
             include: {
@@ -422,42 +425,85 @@ export const resolvers = {
     }
   },
   User: {
-    followers: async (parent: User) => {
+    posts: async (parent: any) => {
+      if (parent.posts) return parent.posts;
+      return prisma.post.findMany({
+        where: { authorId: parent.id },
+        include: {
+          author: true,
+          likes: { include: { user: true } },
+          comments: { include: { author: true } },
+          savedBy: { include: { user: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+    },
+    followers: async (parent: any) => {
+      if (parent.followers) {
+        return parent.followers.map((f: any) => f.follower || f);
+      }
       const follows = await prisma.follows.findMany({
         where: { followingId: parent.id },
         include: { follower: true }
       });
-      return follows.map(f => f.follower);
+      return follows.map((f: any) => f.follower);
     },
-    following: async (parent: User) => {
+    following: async (parent: any) => {
+      if (parent.following) {
+        return parent.following.map((f: any) => f.following || f);
+      }
       const follows = await prisma.follows.findMany({
         where: { followerId: parent.id },
         include: { following: true }
       });
-      return follows.map(f => f.following);
+      return follows.map((f: any) => f.following);
     },
-    likes: async (parent: User) => {
+    likes: async (parent: any) => {
+      if (parent.likes) return parent.likes;
       return prisma.like.findMany({
         where: { userId: parent.id },
-        include: { post: true, user: true },
-        orderBy: { createdAt: 'desc' }
+        include: {
+          post: {
+            include: {
+              author: true,
+              likes: { include: { user: true } },
+              comments: { include: { author: true } }
+            }
+          },
+          user: true
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 30
       });
     },
-    comments: async (parent: User) => {
+    comments: async (parent: any) => {
+      if (parent.comments) return parent.comments;
       return prisma.comment.findMany({
         where: { authorId: parent.id },
-        include: { post: true, author: true },
-        orderBy: { createdAt: 'desc' }
+        include: {
+          post: {
+            include: {
+              author: true,
+              likes: { include: { user: true } },
+              comments: { include: { author: true } }
+            }
+          },
+          author: true
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 30
       });
     },
-    savedPosts: async (parent: User) => {
+    savedPosts: async (parent: any) => {
+      if (parent.savedPosts) return parent.savedPosts;
       return prisma.savedPost.findMany({
         where: { userId: parent.id },
         include: { post: true, user: true },
         orderBy: { createdAt: 'desc' }
       });
     },
-    stories: async (parent: User) => {
+    stories: async (parent: any) => {
+      if (parent.stories) return parent.stories;
       const now = new Date();
       return prisma.story.findMany({
         where: { authorId: parent.id, expiresAt: { gt: now } },

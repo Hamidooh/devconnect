@@ -829,4 +829,25 @@ input:focus, textarea:focus {
   color: hsl(var(--text-primary));
 }
 
+/* Shimmer Skeleton Loaders */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--bg-tertiary)) 25%,
+    hsl(var(--border-subtle)) 50%,
+    hsl(var(--bg-tertiary)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 

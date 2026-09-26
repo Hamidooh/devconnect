@@ -93,6 +93,9 @@ model Post {
   savedBy   SavedPost[]
   notifications Notification[]
   sharedInStories Story[]
+
+  @@index([authorId])
+  @@index([createdAt])
 }
 
 model Comment {
@@ -105,6 +108,9 @@ model Comment {
   
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([postId])
 }
 
 model Like {
@@ -152,6 +158,8 @@ model Message {
   
   receiverId  String
   receiver    User     @relation("receivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
 }
 
 model Notification {
@@ -168,6 +176,8 @@ model Notification {
 
   postId    String?
   post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([receiverId])
 }
 
 model Story {

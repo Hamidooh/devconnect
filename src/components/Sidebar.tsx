@@ -18,6 +18,16 @@ const GET_UNREAD_NOTIFICATIONS = gql`
   }
 `;
 
+const GET_ME_SIDEBAR = gql`
+  query GetMeSidebar {
+    me {
+      id
+      name
+      image
+    }
+  }
+`;
+
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -52,6 +62,15 @@ export default function Sidebar() {
     nextFetchPolicy: "cache-first",
     pollInterval: 60000 // Poll every 60s
   });
+
+  const { data: meData } = useQuery<{ me: { id: string; name: string | null; image: string | null } }>(GET_ME_SIDEBAR, {
+    skip: !session,
+    fetchPolicy: "cache-and-network",
+  });
+
+  // Use the DB image so it stays up-to-date after profile edits
+  const avatarImage = meData?.me?.image || session?.user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${session?.user?.name || "User"}`;
+  const displayName = meData?.me?.name || session?.user?.name || "User";
 
   const unreadCount = notifData?.getNotifications?.filter((n: { read: boolean }) => !n.read).length || 0;
 
@@ -242,28 +261,29 @@ export default function Sidebar() {
         {session ? (
           <>
             <img 
-              src={session.user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + (session.user?.name || "User")} 
-              alt="Avatar" 
-              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+              src={avatarImage}
+              alt={displayName}
+              style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid rgba(255,255,255,0.15)' }}
             />
-            <button 
-              onClick={() => signOut()}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'hsl(var(--sidebar-text))',
-                border: 'none',
-                borderRadius: '20px',
-                padding: '10px 20px',
-                fontWeight: 'bold',
-                fontSize: '15px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
-              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
-            >
-              Sign Out
-            </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: 'hsl(var(--sidebar-text))', fontWeight: 'bold', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+              <button 
+                onClick={() => signOut()}
+                style={{
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.6)',
+                  border: 'none',
+                  padding: 0,
+                  fontWeight: '500',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = 'white'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+              >
+                Sign out
+              </button>
+            </div>
           </>
         ) : (
           <button 

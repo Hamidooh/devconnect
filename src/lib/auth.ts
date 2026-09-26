@@ -35,13 +35,20 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+  // jwt strategy is required for CredentialsProvider to work with PrismaAdapter
   session: {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      // On first sign-in, user object is available — persist the DB id into the token
       if (user) {
         token.id = user.id
+      }
+      // For Google sign-in, look up the user in the DB by email to get the real DB id
+      if (account?.provider === "google" && token.email && !token.id) {
+        const dbUser = await prisma.user.findUnique({ where: { email: token.email } })
+        if (dbUser) token.id = dbUser.id
       }
       return token
     },
@@ -51,5 +58,8 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     }
+  },
+  pages: {
+    signIn: "/api/auth/signin",
   }
 }

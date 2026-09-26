@@ -45,8 +45,7 @@ yarn-error.log*
 *.db-journal
 
 # uploads & scratch
-/public/uploads/*
-!/public/uploads/.gitkeep
+# (public/uploads is tracked so uploaded photos appear on Vercel)
 /scratch/
 check.js
 fix_anys_script.js

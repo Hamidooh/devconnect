@@ -613,28 +613,36 @@ input:focus, textarea:focus {
   flex-shrink: 0;
 }
 
-.sidebar-logo {
-  padding: 24px 16px 16px;
-  margin-bottom: 2px;
-}
-
-.sidebar-close-btn {
-  background: none;
-  border: none;
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 210;
+  background-color: hsl(var(--sidebar-bg));
   color: hsl(var(--sidebar-text));
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.8;
-  transition: opacity 0.2s, background-color 0.2s;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.2s, transform 0.2s, opacity 0.2s;
 }
 
-.sidebar-close-btn:hover {
-  opacity: 1;
+.sidebar-toggle-btn:hover {
   background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.sidebar-logo {
+  padding: 68px 16px 16px;
+  margin-bottom: 2px;
 }
 
 .sidebar-overlay {
@@ -778,8 +786,16 @@ input:focus, textarea:focus {
     display: flex;
   }
 
-  .sidebar-close-btn {
+  .sidebar-toggle-btn {
+    display: none;
+  }
+
+  .sidebar-toggle-btn.open {
     display: flex;
+  }
+
+  .sidebar-overlay.show {
+    display: block;
   }
 
   .sidebar {
@@ -817,18 +833,32 @@ input:focus, textarea:focus {
   }
 }
 
-/* Desktop styles: static sidebar, no mobile bars */
+/* Desktop styles: collapsible sidebar, no mobile bars */
 @media (min-width: 1025px) {
+  .sidebar-toggle-btn {
+    display: flex !important;
+  }
+
   .sidebar {
     position: sticky !important;
-    transform: none !important;
+    width: 275px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.open {
     width: 275px !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    transform: none !important;
   }
 
-  .sidebar-close-btn {
-    display: none !important;
+  .sidebar.closed {
+    width: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    transform: translateX(-20px) !important;
   }
 
   .mobile-top-header {

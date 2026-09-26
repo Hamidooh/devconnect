@@ -34,10 +34,13 @@ export default function Sidebar() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'));
+    if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+      setIsOpen(false);
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -171,31 +174,49 @@ export default function Sidebar() {
         </div>
       </header>
 
+      {/* Sidebar Toggle Button (Close "X" when open, Hamburger when closed) */}
+      <button 
+        className={`sidebar-toggle-btn ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle Sidebar"
+      >
+        {isOpen ? (
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        )}
+      </button>
+
       {/* Backdrop overlay for mobile drawer */}
       <div 
         className={`sidebar-overlay ${isOpen ? 'show' : ''}`} 
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Main Sidebar (Drawer on mobile, static on desktop) */}
+      {/* Main Sidebar (Drawer on mobile, collapsible on desktop) */}
       <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 12px 8px' }}>
-          <Link href="/" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'hsl(var(--sidebar-text))', fontSize: '22px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+        <div className="sidebar-logo">
+          <Link 
+            href="/" 
+            onClick={() => {
+              if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+                setIsOpen(false);
+              }
+            }} 
+            style={{ textDecoration: 'none', color: 'hsl(var(--sidebar-text))', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             DevConnect
           </Link>
-          <button 
-            className="sidebar-close-btn"
-            onClick={() => setIsOpen(false)}
-            aria-label="Close Sidebar"
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
         </div>
 
         <nav className="sidebar-nav">

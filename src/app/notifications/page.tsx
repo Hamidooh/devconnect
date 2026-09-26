@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -43,13 +43,14 @@ export default function NotificationsPage() {
   });
   const [markRead] = useMutation(MARK_NOTIFICATIONS_READ);
 
+  const hasMarkedRead = useRef(false);
+
   useEffect(() => {
-    if (session) {
-      markRead().then(() => {
-        // Optimistically mark all as read locally or just let the next fetch handle it
-      }).catch(console.error);
+    if (session && !hasMarkedRead.current) {
+      hasMarkedRead.current = true;
+      markRead().catch(console.error);
     }
-  }, [session, markRead]);
+  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!session) {
     return (

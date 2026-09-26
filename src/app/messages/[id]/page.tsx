@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useSession } from "next-auth/react";
-import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
 import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 
@@ -114,10 +114,10 @@ export default function ChatPage() {
   if (!user) return <div className="container" style={{paddingTop: '100px'}}>User not found.</div>;
 
   return (
-    <>
-      <Navbar />
-      <main className="container" style={{ padding: 0, height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column' }}>
-        <div className="connect-header" style={{ borderBottom: '1px solid hsl(var(--border))', position: 'sticky', top: 0, zIndex: 10 }}>
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content" style={{ padding: 0, height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="connect-header" style={{ borderBottom: '1px solid hsl(var(--border-subtle))', position: 'sticky', top: 0, zIndex: 10, background: 'hsl(var(--bg-primary))' }}>
           <button className="back-btn" onClick={() => router.back()}>←</button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="avatar" style={{ width: '40px', height: '40px' }}>
@@ -148,7 +148,7 @@ export default function ChatPage() {
                 <div style={{
                   maxWidth: '70%',
                   background: isMe ? 'hsl(var(--accent-primary))' : 'hsl(var(--bg-tertiary))',
-                  color: isMe ? 'white' : 'hsl(var(--text))',
+                  color: isMe ? 'white' : 'hsl(var(--text-primary))',
                   padding: '12px 16px',
                   borderRadius: '16px',
                   borderBottomRightRadius: isMe ? '4px' : '16px',
@@ -163,7 +163,7 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div style={{ padding: '16px', borderTop: '1px solid hsl(var(--border))', background: 'hsl(var(--bg-primary))' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid hsl(var(--border-subtle))', background: 'hsl(var(--bg-primary))' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input 
               type="text" 
@@ -179,7 +179,7 @@ export default function ChatPage() {
                 border: 'none',
                 borderRadius: '9999px',
                 padding: '12px 20px',
-                color: 'hsl(var(--text))',
+                color: 'hsl(var(--text-primary))',
                 outline: 'none'
               }}
             />
@@ -197,6 +197,6 @@ export default function ChatPage() {
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }

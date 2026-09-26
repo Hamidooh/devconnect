@@ -24,8 +24,12 @@ export default function Sidebar() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setIsOpen(false);
+    }
     setIsDarkMode(document.documentElement.classList.contains('dark'));
   }, []);
 
@@ -122,8 +126,33 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-logo" style={{ padding: '24px 16px 16px' }}>
+    <>
+      <button 
+        className={`sidebar-toggle-btn ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle Sidebar"
+      >
+        {isOpen ? (
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        )}
+      </button>
+
+      <div 
+        className={`sidebar-overlay ${isOpen ? 'show' : ''}`} 
+        onClick={() => setIsOpen(false)}
+      />
+
+      <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+      <div className="sidebar-logo">
         <Link href="/" style={{ textDecoration: 'none', color: 'hsl(var(--sidebar-text))', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -268,6 +297,7 @@ export default function Sidebar() {
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
       />
-    </div>
+      </div>
+    </>
   );
 }

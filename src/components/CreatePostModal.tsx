@@ -70,14 +70,14 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
   
   const [createPost, { loading }] = useMutation<{ createPost: any }>(CREATE_POST, {
     update(cache, { data }) {
-      const createPost = data?.createPost;
-      if (!createPost) return;
+      const newPost = data?.createPost;
+      if (!newPost) return;
       try {
         const existingFeed = cache.readQuery<{ feed: any[] }>({ query: GET_FEED });
         if (existingFeed) {
           cache.writeQuery({
             query: GET_FEED,
-            data: { feed: [createPost, ...existingFeed.feed] },
+            data: { feed: [newPost, ...existingFeed.feed] },
           });
         }
       } catch (e) {

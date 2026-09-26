@@ -31,7 +31,7 @@ export default function StoryViewerModal({ story, isOpen, onClose }: { story: St
       viewStory({ variables: { storyId: story.id } }).catch(console.error);
     }
     setShowViewers(false);
-  }, [isOpen, story, session, viewStory]);
+  }, [isOpen, story?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen || !story) return null;
 
@@ -111,10 +111,7 @@ export default function StoryViewerModal({ story, isOpen, onClose }: { story: St
               cursor: showViewers ? 'default' : 'pointer'
             }}
             onClick={() => {
-              if (!showViewers) {
-                setShowViewers(true);
-                viewStory({ variables: { storyId: story.id } }).catch(console.error);
-              }
+              if (!showViewers) setShowViewers(true);
             }}
           >
             {showViewers && (

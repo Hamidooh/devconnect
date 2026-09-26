@@ -227,6 +227,26 @@ export const resolvers = {
         include: { author: true, likes: true, comments: true }
       });
     },
+    deletePost: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      if (!context.session?.user?.id) throw new Error("Not authenticated");
+      const post = await prisma.post.findUnique({ where: { id } });
+      if (!post) throw new Error("Post not found");
+
+      const isOwner = post.authorId === context.session.user.id || !post.authorId;
+      if (!isOwner) {
+        throw new Error("You are not authorized to delete this post");
+      }
+
+      await prisma.$transaction([
+        prisma.like.deleteMany({ where: { postId: id } }),
+        prisma.comment.deleteMany({ where: { postId: id } }),
+        prisma.savedPost.deleteMany({ where: { postId: id } }),
+        prisma.notification.deleteMany({ where: { postId: id } }),
+        prisma.story.updateMany({ where: { sharedPostId: id }, data: { sharedPostId: null } }),
+        prisma.post.delete({ where: { id } })
+      ]);
+      return true;
+    },
     likePost: async (_: unknown, { postId }: { postId: string }, context: GraphQLContext) => {
       if (!context.session?.user?.id) throw new Error("Not authenticated");
       

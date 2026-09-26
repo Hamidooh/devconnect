@@ -3,8 +3,9 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 
 const LIKE_POST = gql`
@@ -43,6 +44,12 @@ const CREATE_STORY = gql`
   }
 `;
 
+const DELETE_POST = gql`
+  mutation DeletePost($id: ID!) {
+    deletePost(id: $id)
+  }
+`;
+
 type PostType = Prisma.PostGetPayload<{
   include: {
     author: true;
@@ -53,6 +60,7 @@ type PostType = Prisma.PostGetPayload<{
 }>;
 
 export default function PostCard({ post }: { post: PostType }) {
+  const router = useRouter();
   const { data: session } = useSession();
   const [likePost] = useMutation(LIKE_POST);
   const [unlikePost] = useMutation(UNLIKE_POST);
@@ -65,6 +73,50 @@ export default function PostCard({ post }: { post: PostType }) {
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [showLikesModal, setShowLikesModal] = useState(false);
   const [saved, setSaved] = useState(hasSaved || false);
+
+  const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const isAuthor = Boolean(
+    session?.user?.id && (post.author?.id === session.user.id || !post.author?.id)
+  );
+
+  const [deletePostMutation, { loading: deleting }] = useMutation(DELETE_POST, {
+    update(cache) {
+      cache.evict({ id: cache.identify({ __typename: "Post", id: post.id }) });
+      cache.gc();
+    },
+    refetchQueries: ["GetFeed", "Feed", "GetExplore", "Explore", "GetUserProfile", "GetPostForDetail"],
+  });
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMenu]);
+
+  const handleDelete = async () => {
+    try {
+      await deletePostMutation({ variables: { id: post.id } });
+      setShowDeleteModal(false);
+      setIsDeleted(true);
+      if (typeof window !== "undefined" && window.location.pathname.startsWith(`/post/${post.id}`)) {
+        router.push("/");
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to delete post");
+    }
+  };
 
   const [createStory, { loading: sharing }] = useMutation(CREATE_STORY, {
     refetchQueries: ["GetStories"],
@@ -123,9 +175,13 @@ export default function PostCard({ post }: { post: PostType }) {
     }
   };
 
+  if (isDeleted) {
+    return null;
+  }
+
   return (
     <div className="card">
-      <div className="post-header" style={{ padding: '16px 16px 0', marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
+      <div className="post-header" style={{ padding: '16px 16px 0', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href={`/profile/${post.author.id}`} style={{ textDecoration: 'none', display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div className="avatar">
             <img src={post.author.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + post.author.name} alt="Avatar" />
@@ -138,13 +194,153 @@ export default function PostCard({ post }: { post: PostType }) {
             <div className="post-time">{new Date(Number(post.createdAt)).toLocaleString()}</div>
           </div>
         </Link>
-        <button className="action-btn" style={{ marginLeft: 'auto' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="19" cy="12" r="1"></circle>
-            <circle cx="5" cy="12" r="1"></circle>
-          </svg>
-        </button>
+
+        {/* More options menu */}
+        <div ref={menuRef} style={{ position: 'relative', marginLeft: 'auto' }}>
+          <button 
+            className="action-btn" 
+            style={{ 
+              padding: '6px', 
+              borderRadius: '50%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              backgroundColor: showMenu ? 'hsl(var(--bg-tertiary))' : 'transparent',
+              transition: 'background-color 0.15s ease'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            title="More options"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+
+          {showMenu && (
+            <div 
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '100%',
+                marginTop: '6px',
+                backgroundColor: 'hsl(var(--bg-secondary))',
+                border: '1px solid hsl(var(--border-subtle))',
+                borderRadius: '12px',
+                boxShadow: 'var(--shadow-md)',
+                padding: '6px',
+                minWidth: '170px',
+                zIndex: 50,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {isAuthor && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    setShowDeleteModal(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    fontSize: '14px',
+                    color: '#ef4444',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    width: '100%',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    transition: 'background-color 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                  Delete post
+                </button>
+              )}
+
+              <button
+                onClick={(e) => {
+                  handleShare(e);
+                  setShowMenu(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 12px',
+                  fontSize: '14px',
+                  color: 'hsl(var(--text-primary))',
+                  borderRadius: '8px',
+                  textAlign: 'left',
+                  width: '100%',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  transition: 'background-color 0.15s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--bg-tertiary))'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                Copy link
+              </button>
+
+              {!isAuthor && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    alert("Post reported. Thank you for helping keep our community safe.");
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    fontSize: '14px',
+                    color: 'hsl(var(--text-secondary))',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    width: '100%',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    transition: 'background-color 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--bg-tertiary))'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                    <line x1="4" y1="22" x2="4" y2="15"></line>
+                  </svg>
+                  Report post
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {post.mediaUrl && (
@@ -240,6 +436,76 @@ export default function PostCard({ post }: { post: PostType }) {
                   </div>
                 </Link>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div 
+          className="modal-overlay" 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowDeleteModal(false);
+          }} 
+          style={{ zIndex: 1000 }}
+        >
+          <div 
+            className="modal-content" 
+            onClick={(e) => e.stopPropagation()} 
+            style={{ 
+              padding: '24px', 
+              maxWidth: '360px', 
+              borderRadius: '16px',
+              backgroundColor: 'hsl(var(--bg-secondary))',
+              border: '1px solid hsl(var(--border-subtle))'
+            }}
+          >
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700, color: 'hsl(var(--text-primary))' }}>
+              Delete post?
+            </h2>
+            <p style={{ margin: '0 0 20px 0', fontSize: '14px', lineHeight: 1.5, color: 'hsl(var(--text-muted))' }}>
+              This cannot be undone and it will be removed from your profile, the home feed, and search results.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button 
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  borderRadius: '9999px',
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  opacity: deleting ? 0.7 : 1,
+                  transition: 'background-color 0.15s ease'
+                }}
+                onMouseEnter={(e) => { if (!deleting) e.currentTarget.style.backgroundColor = '#dc2626'; }}
+                onMouseLeave={(e) => { if (!deleting) e.currentTarget.style.backgroundColor = '#ef4444'; }}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: 'transparent',
+                  color: 'hsl(var(--text-primary))',
+                  border: '1px solid hsl(var(--border-subtle))',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  borderRadius: '9999px',
+                  cursor: deleting ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

@@ -93,6 +93,7 @@ export const typeDefs = gql`
 
   type Mutation {
     createPost(content: String!, mediaUrl: String): Post!
+    deletePost(id: ID!): Boolean!
     createStory(mediaUrl: String, sharedPostId: ID): Story!
     deleteStory(id: ID!): Boolean!
     likePost(postId: ID!): Like!

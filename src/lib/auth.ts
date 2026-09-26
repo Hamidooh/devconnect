@@ -11,6 +11,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -46,15 +47,21 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
       }
       // For Google sign-in, look up the user in the DB by email to get the real DB id
-      if (account?.provider === "google" && token.email && !token.id) {
+      if (account?.provider === "google" && token.email) {
         const dbUser = await prisma.user.findUnique({ where: { email: token.email } })
-        if (dbUser) token.id = dbUser.id
+        if (dbUser) {
+          token.id = dbUser.id
+          if (dbUser.name) token.name = dbUser.name
+          if (dbUser.image) token.picture = dbUser.image
+        }
       }
       return token
     },
     async session({ session, token }) {
       if (session.user && token) {
         session.user.id = token.id as string
+        if (token.name) session.user.name = token.name
+        if (token.picture) session.user.image = token.picture
       }
       return session
     }

@@ -1,0 +1,22 @@
+- `[x]` 1. Infrastructure Setup (SQLite)
+  - `[x]` Create `docker-compose.yml` for PostgreSQL, MinIO, Nginx (Skipped, using SQLite)
+  - `[x]` Start Docker Compose (Skipped)
+- `[x]` 2. Next.js App Initialization
+  - `[x]` Initialize Next.js project (Vanilla CSS, App Router)
+  - `[x]` Install dependencies (GraphQL, Apollo, Prisma, NextAuth)
+- `[x]` 3. Database Schema (Prisma)
+  - `[x]` Initialize Prisma
+  - `[x]` Define User, Post, Comment, Like, Follow schema
+  - `[x]` Run Prisma migrations (db push)
+- `[x]` 4. Backend API
+  - `[x]` Setup NextAuth.js (Google + Email/Password)
+  - `[x]` Configure Apollo Server in Next.js App Route
+  - `[x]` Write GraphQL TypeDefs
+  - `[x]` Write GraphQL Resolvers
+- `[x]` 5. Frontend UI
+  - `[x]` Setup Global Styles (Premium Design, Dark Mode)
+  - `[x]` Build Components (Navbar, PostCard, Auth Modal)
+  - `[x]` Build Pages (Feed, Profile)
+- `[x]` 6. Verification
+  - `[x]` Test Core Flows (Post, Like, Follow)
+  - `[x]` Create Walkthrough Artifact

@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.2.7",
@@ -36,6 +37,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "prisma": "^7.8.0",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

@@ -15,7 +15,7 @@ Initialized a modern Next.js App Router project and installed:
 - Removed TailwindCSS entirely in favor of a Vanilla CSS styling system.
 
 ### 3. Database Schema (Prisma)
-Defined a comprehensive relational data model in [schema.prisma](file:///c:/Users/HP/Desktop/Personal%20app/prisma/schema.prisma) including:
+Defined a comprehensive relational data model in [schema.prisma](prisma/schema.prisma) including:
 - `User`, `Account`, `Session`, `VerificationToken` (NextAuth required models)
 - `Post` (with content and author relation)
 - `Comment` and `Like` (with relations to Posts and Users)
@@ -23,11 +23,11 @@ Defined a comprehensive relational data model in [schema.prisma](file:///c:/User
 
 ### 4. Backend API (GraphQL)
 Set up an Apollo Server at `/api/graphql` featuring:
-- **Type Definitions**: Covering all the Prisma models ([schema.ts](file:///c:/Users/HP/Desktop/Personal%20app/src/graphql/schema.ts))
-- **Resolvers**: Handling authentication context, fetching the feed, creating posts, liking, and following ([resolvers.ts](file:///c:/Users/HP/Desktop/Personal%20app/src/graphql/resolvers.ts)).
+- **Type Definitions**: Covering all the Prisma models ([schema.ts](src/graphql/schema.ts))
+- **Resolvers**: Handling authentication context, fetching the feed, creating posts, liking, and following ([resolvers.ts](src/graphql/resolvers.ts)).
 
 ### 5. Frontend UI & Aesthetics
-Implemented a sleek, dark-mode focused premium design using Vanilla CSS ([globals.css](file:///c:/Users/HP/Desktop/Personal%20app/src/app/globals.css)).
+Implemented a sleek, dark-mode focused premium design using Vanilla CSS ([globals.css](src/app/globals.css)).
 - **Navigation**: Integrated NextAuth sign in/out buttons.
 - **Feed**: A real-time updating feed of posts using Apollo Client.
 - **Post Cards**: Interactive components that allow authenticated users to like posts.

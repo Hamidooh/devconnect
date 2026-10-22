@@ -1,9 +1,9 @@
-import { NextAuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { prisma } from "./prisma"
-import bcrypt from "bcrypt"
+import { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "./prisma";
+import bcrypt from "bcrypt";
 
 const baseAdapter = PrismaAdapter(prisma);
 
@@ -138,8 +138,8 @@ export const authOptions: NextAuthOptions = {
           return { id: user.id, email: user.email, name: user.name, image: user.image };
         }
 
-        // 3. For the demo test@example.com account, also allow "password123"
-        if (email === "test@example.com" && password === "password123") {
+        // 3. For the demo test@example.com account, also allow "password123" in non-production
+        if (process.env.NODE_ENV !== "production" && email === "test@example.com" && password === "password123") {
           return { id: user.id, email: user.email, name: user.name, image: user.image };
         }
 
@@ -160,7 +160,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
       }
-      if (!token.id && token.email) {
+      // For Google OAuth or whenever token.id needs DB resolution, lookup DB user by email
+      if ((account?.provider === "google" || !token.id) && token.email) {
         const dbUser = await prisma.user.findUnique({ where: { email: token.email } });
         if (dbUser) {
           token.id = dbUser.id;
@@ -178,8 +179,5 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     }
-  },
-  pages: {
-    signIn: "/api/auth/signin",
   }
-}
+};

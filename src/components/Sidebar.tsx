@@ -8,6 +8,7 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import CreatePostModal from "./CreatePostModal";
 import SearchModal from "./SearchModal";
+import AuthModal from "./AuthModal";
 
 const GET_UNREAD_NOTIFICATIONS = gql`
   query GetNotificationsCount {
@@ -33,6 +34,7 @@ export default function Sidebar() {
   const { data: session } = useSession();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -340,7 +342,7 @@ export default function Sidebar() {
           </>
         ) : (
           <button 
-            onClick={() => signIn()}
+            onClick={() => setIsAuthModalOpen(true)}
             style={{
               background: '#1d9bf0',
               color: 'white',
@@ -356,7 +358,7 @@ export default function Sidebar() {
             onMouseOver={(e) => e.currentTarget.style.background = '#1a8cd8'}
             onMouseOut={(e) => e.currentTarget.style.background = '#1d9bf0'}
           >
-            Log In
+            Sign In
           </button>
         )}
       </div>
@@ -369,6 +371,10 @@ export default function Sidebar() {
       <SearchModal
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
+      />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
       </div>
 

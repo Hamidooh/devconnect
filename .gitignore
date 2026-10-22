@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (never commit real secrets)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -44,8 +45,11 @@ yarn-error.log*
 *.db
 *.db-journal
 
-# uploads & scratch
-# (public/uploads is tracked so uploaded photos appear on Vercel)
+# uploads & sensitive user media
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# scratch & temporary files
 /scratch/
 check.js
 fix_anys_script.js
@@ -58,4 +62,3 @@ AGENTS.md
 
 # local infrastructure
 docker-compose*.yml
-

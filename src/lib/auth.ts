@@ -80,6 +80,10 @@ export const authOptions: NextAuthOptions = {
     }
   },
   secret: process.env.NEXTAUTH_SECRET || "devconnect-super-secret-jwt-key-2026-safe-production-32chars!",
+  // Custom pages — prevents NextAuth from showing its default ugly error screen
+  pages: {
+    error: "/auth/error",
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",

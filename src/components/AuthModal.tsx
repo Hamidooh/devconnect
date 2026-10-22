@@ -21,11 +21,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       setGoogleLoading(true);
       setError(null);
-      // signIn with google provider and redirect back to current page
-      await signIn("google", { callbackUrl: window.location.href });
+      // Redirect to "/" after Google sign-in completes.
+      // NextAuth handles the OAuth flow and redirects back automatically.
+      // If it fails, NextAuth redirects to /auth/error (our custom error page).
+      await signIn("google", { callbackUrl: "/" });
     } catch (err) {
       console.error("Google sign-in error:", err);
-      setError("Failed to initialize Google Sign-In. Ensure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set in .env.");
+      setError("Failed to connect to Google. Please try again.");
       setGoogleLoading(false);
     }
   };
@@ -146,16 +148,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               padding: '12px 16px',
               borderRadius: '10px',
               border: '1px solid hsl(var(--border-subtle))',
-              background: 'hsl(var(--bg-secondary))',
-              color: 'hsl(var(--text-primary))',
+              background: 'white',
+              color: '#1f2937',
               fontSize: '15px',
               fontWeight: '600',
               cursor: googleLoading ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+              opacity: googleLoading ? 0.7 : 1,
             }}
-            onMouseOver={(e) => e.currentTarget.style.borderColor = 'hsl(var(--accent-primary))'}
-            onMouseOut={(e) => e.currentTarget.style.borderColor = 'hsl(var(--border-subtle))'}
           >
             {/* Google official logo SVG */}
             <svg width="20" height="20" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>

@@ -1,20 +1,9 @@
 import NextAuth from "next-auth";
 import { authOptions } from "../../../../lib/auth";
-import { NextRequest } from "next/server";
 
-const nextAuthHandler = NextAuth(authOptions);
-
-async function handler(req: NextRequest, context: any) {
-  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
-  const proto = req.headers.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
-
-  if (host) {
-    const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
-    const safeProto = isLocalhost ? proto : "https";
-    process.env.NEXTAUTH_URL = `${safeProto}://${host}`;
-  }
-
-  return nextAuthHandler(req as any, context);
-}
+// Clean NextAuth handler — no runtime env mutation needed.
+// NEXTAUTH_URL must be set correctly in Vercel Dashboard env vars:
+//   NEXTAUTH_URL=https://devconnect-sage-pi.vercel.app
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
